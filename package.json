@@ -1,12 +1,12 @@
 {
-  "name": "esformatter-jsx",
+  "name": "esformatter-jsx-expression-align",
   "version": "8.0.0",
   "description": "esformatter plugin: format javascript files that contain React JSX Elements",
-  "repository": "royriojas/esformatter-jsx",
+  "repository": "obchelli/esformatter-jsx-expression-align",
   "license": "MIT",
   "author": {
-    "name": "Roy Riojas",
-    "url": "http://royriojas.com"
+    "name": "obchelli",
+    "url": "http://obchelli.com"
   },
   "main": "lib/plugin.js",
   "files": [
