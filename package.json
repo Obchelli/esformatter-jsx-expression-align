@@ -1,6 +1,6 @@
 {
   "name": "esformatter-jsx-expression-align",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "esformatter plugin: format javascript files that contain React JSX Elements",
   "repository": "obchelli/esformatter-jsx-expression-align",
   "license": "MIT",
