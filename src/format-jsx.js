@@ -40,6 +40,15 @@ function removeEmptyLines(code) {
   return code.split('\n').filter(line => (line.trim() !== '')).join('\n');
 }
 
+function  _numberOfChunks(text, chunk) {
+	var count = 0;
+	var index = 0;
+	while (text.charAt(index++) === chunk) {
+		count++;
+	}
+	return count;
+}
+
 function alingText(source, node, htmlOptions) {
   const jsxParent = findParent(node, 'JSXElement');
   let column = node.loc.start.column;
@@ -316,6 +325,7 @@ module.exports = {
             const keys = Object.keys(expressionContainers);
             keys.forEach((key) => {
               const index = line.indexOf(key);
+              const idx = _numberOfChunks(line, htmlOptions.indent_char);
               if (index > -1) {
                 const theExpression = expressionContainers[key];
                 const parts = theExpression.formatted.split('\n').map((part, i) => {
@@ -325,7 +335,7 @@ module.exports = {
                   if (theExpression.type === 'TemplateLiteral') {
                     return part;
                   }
-                  return new Array(index + 1).join(' ') + part;
+                  return new Array(idx + htmlOptions.indent_size).join(htmlOptions.indent_char) + part;
                 });
 
                 // had to use split/join instead of plain replace because
