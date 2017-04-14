@@ -1,8 +1,9 @@
-# [esformatter](https://github.com/millermedeiros/esformatter)-jsx
-> esformatter plugin: format javascript files that contain React JSX blocks
+# [esformatter](https://github.com/millermedeiros/esformatter)-jsx-expression-align
+> esformatter plugin: format javascript files that contain React JSX blocks is based on original esformatter-jsx but fixes indentation
+issue with inline Javascript expressions. This is quick and dirty fix and all glory belongs to esformatter-jsx guys
 
-[![NPM Version](http://img.shields.io/npm/v/esformatter-jsx.svg?style=flat)](https://npmjs.org/package/esformatter-jsx)
-[![Build Status](http://img.shields.io/travis/royriojas/esformatter-jsx.svg?style=flat)](https://travis-ci.org/royriojas/esformatter-jsx)
+[![NPM Version](http://img.shields.io/npm/v/esformatter-jsx-expression-align.svg?style=flat)](https://npmjs.org/package/esformatter-jsx-expression-align)
+[![Build Status](http://img.shields.io/travis/obchelli/esformatter-jsx-expression-align.svg?style=flat)](https://travis-ci.org/obchelli/esformatter-jsx-expression-align)
 
 ## Demo
 
