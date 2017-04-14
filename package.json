@@ -97,9 +97,9 @@
       "Generated Changelog"
     ],
     "issueIDRegExp": "#(\\d+)",
-    "commitURL": "https://github.com/royriojas/esformatter-jsx/commit/{0}",
+    "commitURL": "https://github.com/obchelli/esformatter-jsx-expression-align/commit/{0}",
     "authorURL": "https://github.com/{0}",
-    "issueIDURL": "https://github.com/royriojas/esformatter-jsx/issues/{0}",
-    "projectName": "esformatter-jsx"
+    "issueIDURL": "https://github.com/royriojas/esformatter-jsx-expression-align/issues/{0}",
+    "projectName": "esformatter-jsx-expression-align"
   }
 }
