@@ -1,32 +1,34 @@
-const findParent = require('./find-parent');
-const falafel = require('./falafel-helper');
-const iterateReverse = require('./iterate-reverse');
-const beautifier = require('js-beautify-ejsx');
-const transformString = require('./transform-string');
+'use strict';
+
+var findParent = require('./find-parent');
+var falafel = require('./falafel-helper');
+var iterateReverse = require('./iterate-reverse');
+var beautifier = require('js-beautify-ejsx');
+var transformString = require('./transform-string');
 
 function replaceJSXExpressionContainer(source) {
-  const response = [];
-  let index;
+  var response = [];
+  var index = void 0;
 
-  const ast = falafel(source, (node) => {
+  var ast = falafel(source, function (node) {
     if (node.type === 'JSXExpressionContainer') {
-      let attribute = false;
-      let replacement;
+      var attribute = false;
+      var replacement = void 0;
       index = response.length;
 
       if (findParent(node, 'JSXAttribute')) {
         attribute = true;
-        replacement = `"__JSXattribute_0_${  index  }"`;
+        replacement = '"__JSXattribute_0_' + index + '"';
       } else {
-        replacement = `<__JSXExpression_0_${  index  } />`;
+        replacement = '<__JSXExpression_0_' + index + ' />';
       }
 
-      const loc = node.loc || node.node.loc;
+      var loc = node.loc || node.node.loc;
 
       response.push({
         jsxAttribute: attribute,
         code: node.source(),
-        column: loc.start.column,
+        column: loc.start.column
       });
 
       node.update(replacement);
@@ -37,50 +39,52 @@ function replaceJSXExpressionContainer(source) {
 }
 
 function removeEmptyLines(code) {
-  return code.split('\n').filter(line => (line.trim() !== '')).join('\n');
+  return code.split('\n').filter(function (line) {
+    return line.trim() !== '';
+  }).join('\n');
 }
 
-function  _numberOfChunks(text, chunk) {
-	var count = 0;
-	var index = 0;
-	while (text.charAt(index++) === chunk) {
-		count++;
-	}
-	return count;
+function _numberOfChunks(text, chunk) {
+  var count = 0;
+  var index = 0;
+  while (text.charAt(index++) === chunk) {
+    count++;
+  }
+  return count;
 }
 
 function alingText(source, node, htmlOptions) {
-  const jsxParent = findParent(node, 'JSXElement');
-  let column = node.loc.start.column;
+  var jsxParent = findParent(node, 'JSXElement');
+  var column = node.loc.start.column;
   if (jsxParent) {
     column = node.loc.start.column - jsxParent.loc.start.column;
   }
 
-  let first = false;
-  return removeEmptyLines(source).split('\n').map((line) => {
+  var first = false;
+  return removeEmptyLines(source).split('\n').map(function (line) {
     line = line.replace(/\s+$/g, '');
     if (!first) {
       first = true;
       return line;
     }
-    const alingWith = (column + 1);
+    var alingWith = column + 1;
     if (alingWith < 0) {
       return line;
     }
-    return ((new Array(alingWith)).join(htmlOptions.indent_char)) + line;
+    return new Array(alingWith).join(htmlOptions.indent_char) + line;
   }).join('\n');
 }
 
 function addSpaces(container, column) {
-  let parts = container.split('\n');
-  let first = false;
+  var parts = container.split('\n');
+  var first = false;
 
-  parts = parts.map((line) => {
+  parts = parts.map(function (line) {
     if (!first) {
       first = true;
       return line;
     }
-    return (new Array(column + 1)).join(' ') + line;
+    return new Array(column + 1).join(' ') + line;
   });
 
   return parts.join('\n');
@@ -88,12 +92,10 @@ function addSpaces(container, column) {
 
 function restoreContainers(source, containers, space, removeSpace) {
 
-  iterateReverse(containers, (entry, idx) => {
-    let container = entry.code;
-    const column = entry.column;
-    const rx = entry.jsxAttribute ?
-      new RegExp(`['"]__JSXattribute_0_${  idx  }['"]`)
-      : new RegExp(`<__JSXExpression_0_${  idx  }\\s*\\/>`);
+  iterateReverse(containers, function (entry, idx) {
+    var container = entry.code;
+    var column = entry.column;
+    var rx = entry.jsxAttribute ? new RegExp('[\'"]__JSXattribute_0_' + idx + '[\'"]') : new RegExp('<__JSXExpression_0_' + idx + '\\s*\\/>');
 
     if (!entry.jsxAttribute) {
       container = addSpaces(container, column);
@@ -104,7 +106,7 @@ function restoreContainers(source, containers, space, removeSpace) {
     }
     // this line was causing bug#13
     // source = source.replace( rx, container.replace( /^\{\s*/, '{' + space ).replace( /\s*\}$/, space + '}' ) );
-    source = source.split(rx).join(container.replace(/^\{\s*/, `{${  space}`).replace(/\s*\}$/, `${space  }}`));
+    source = source.split(rx).join(container.replace(/^\{\s*/, '{' + space).replace(/\s*\}$/, space + '}'));
   });
 
   if (removeSpace === true) {
@@ -117,44 +119,42 @@ function restoreContainers(source, containers, space, removeSpace) {
 module.exports = {
   replaceJSXExpressionContainers: replaceJSXExpressionContainer,
   restoreJSXExpressionContainers: restoreContainers,
-  create(htmlOptions, jsxOptions, options, esformatter) {
+  create: function create(htmlOptions, jsxOptions, options, esformatter) {
 
-    const ins = {
-      htmlOptions,
-      jsxOptions,
-      _keepUnformatted(tag) {
-        const me = this;
-        const unformatted = me.htmlOptions.unformatted || [];
+    var ins = {
+      htmlOptions: htmlOptions,
+      jsxOptions: jsxOptions,
+      _keepUnformatted: function _keepUnformatted(tag) {
+        var me = this;
+        var unformatted = me.htmlOptions.unformatted || [];
 
         return unformatted.indexOf(tag) > -1;
       },
-      prepareToProcessTags(source) {
-        const me = this;
-        const code = falafel(source, (node) => {
+      prepareToProcessTags: function prepareToProcessTags(source) {
+        var me = this;
+        var code = falafel(source, function (node) {
           if (node.type === 'JSXElement' && !node.selfClosing) {
             if (node.children && node.children.length > 0) {
               if (!me._keepUnformatted(node.openingElement.name.name)) {
-                node.openingElement.update(`${node.openingElement.source()  }\n`);
-                node.closingElement.update(`\n${  node.closingElement.source()}`);
+                node.openingElement.update(node.openingElement.source() + '\n');
+                node.closingElement.update('\n' + node.closingElement.source());
               } else {
 
-                const childrenSource = node.children.map((n, idx) => {
-                  let src = n.source().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                var childrenSource = node.children.map(function (n, idx) {
+                  var src = n.source().replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
-                  const prev = node.children[idx - 1] || { };
-                  const next = node.children[idx + 1] || { };
+                  var prev = node.children[idx - 1] || {};
+                  var next = node.children[idx + 1] || {};
 
-                  if (src.trim() === ''
-                    && prev.type === 'JSXExpressionContainer'
-                    && next.type === 'JSXExpressionContainer') {
+                  if (src.trim() === '' && prev.type === 'JSXExpressionContainer' && next.type === 'JSXExpressionContainer') {
                     src = '';
                   }
                   return src;
                 }).join('').trim();
 
-                const openTag = node.openingElement.source().replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-                const closeTag = node.closingElement.source().replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-                const nSource = openTag + childrenSource + closeTag;
+                var openTag = node.openingElement.source().replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+                var closeTag = node.closingElement.source().replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+                var nSource = openTag + childrenSource + closeTag;
 
                 node.update(nSource);
               }
@@ -163,69 +163,69 @@ module.exports = {
         });
         return removeEmptyLines(code.toString());
       },
-      operateOnOpenTags(source, _htmlOptions) {
-        const me = this;
+      operateOnOpenTags: function operateOnOpenTags(source, _htmlOptions) {
+        var me = this;
 
         // make sure tags are in a single line
-        let ast = falafel(source, (node) => {
+        var ast = falafel(source, function (node) {
           if (node.type === 'JSXOpeningElement') {
             if (node.attributes && node.attributes.length > (me.jsxOptions.maxAttrsOnTag || 0)) {
               if (node.selfClosing) {
-                node.update(node.source().split(/\n/).map(line => line.trim()).join(' '));
+                node.update(node.source().split(/\n/).map(function (line) {
+                  return line.trim();
+                }).join(' '));
               }
             }
           }
         });
 
-        ast = falafel(ast.toString(), (node) => {
+        ast = falafel(ast.toString(), function (node) {
           if (node.type === 'JSXOpeningElement') {
             if (node.attributes && node.attributes.length > (me.jsxOptions.maxAttrsOnTag || 0)) {
-              const first = node.attributes[0];
-              const firstAttributeInSameLine = me.jsxOptions.firstAttributeOnSameLine;
+              var first = node.attributes[0];
+              var firstAttributeInSameLine = me.jsxOptions.firstAttributeOnSameLine;
 
-              const indentSize = _htmlOptions.indent_size || 4;
-              const indentChar = _htmlOptions.indent_char || ' ';
+              var indentSize = _htmlOptions.indent_size || 4;
+              var indentChar = _htmlOptions.indent_char || ' ';
 
-              const alignWith = me.jsxOptions.alignWithFirstAttribute ? first.loc.start.column : node.loc.start.column + indentSize;
-              const tabPrefix = (new Array(alignWith + 1)).join(indentChar);
+              var alignWith = me.jsxOptions.alignWithFirstAttribute ? first.loc.start.column : node.loc.start.column + indentSize;
+              var tabPrefix = new Array(alignWith + 1).join(indentChar);
 
-              let index = 0;
+              var index = 0;
               // console.log( node.attributes );
-              node.attributes.forEach((cNode) => {
+              node.attributes.forEach(function (cNode) {
                 index++; // eslint-disable-line
                 if (firstAttributeInSameLine && index === 1) {
                   // first = false;
                   return;
                 }
 
-                cNode.update(`\n${  tabPrefix  }${cNode.source()}`);
+                cNode.update('\n' + tabPrefix + cNode.source());
               });
 
               if (me.jsxOptions.closingTagOnNewLine) {
                 // If you find a closing tag (including a self-closing tag like />), add a new line, matching the current alignWith
-                const closingTagTabPrefix = (new Array(node.loc.start.column + 1)).join(indentChar);
-                node.update(node.source().replace(/(\/?>)$/, `\n${  closingTagTabPrefix  }$1`));
+                var closingTagTabPrefix = new Array(node.loc.start.column + 1).join(indentChar);
+                node.update(node.source().replace(/(\/?>)$/, '\n' + closingTagTabPrefix + '$1'));
               }
             }
           }
-
         });
 
         return ast.toString();
       },
+      _recursiveFormat: function _recursiveFormat(node) {
+        var originalSource = node.source();
 
-      _recursiveFormat(node) {
-        const originalSource = node.source();
+        var source = originalSource;
 
-        let source = originalSource;
-
-        let code;
+        var code = void 0;
 
         try {
           if (node.type === 'ObjectExpression' || node.type === 'ArrayExpression') {
-            source = `var __OE_AE_VAR_TOKEN__ = ${  source}`;
+            source = 'var __OE_AE_VAR_TOKEN__ = ' + source;
           }
-          let hadBindShorthand = false;
+          var hadBindShorthand = false;
           if ((node.type === 'BindExpression' || node.type === 'CallExpression') && source.match(/^::/)) {
             source = source.replace('::', '');
             hadBindShorthand = true;
@@ -234,10 +234,10 @@ module.exports = {
           code = esformatter.format(source, options).trim();
 
           if (node.type === 'BindExpression' || node.type === 'CallExpression' && hadBindShorthand) {
-            code = `::${  code}`;
+            code = '::' + code;
           }
 
-          falafel(code, (_node) => {
+          falafel(code, function (_node) {
             // this deals with the expressions that can be either object expressions or arrays
             if (_node.type === 'VariableDeclarator' && _node.id.name === '__OE_AE_VAR_TOKEN__') {
               if (_node.init.type === 'ObjectExpression' || _node.init.type === 'ArrayExpression') {
@@ -246,7 +246,7 @@ module.exports = {
                   code = code.replace(/\n\s+/g, ' ');
                   code = code.replace(/\n/g, ' ');
                 }
-              // code = code.replace( /\n/g, '' );
+                // code = code.replace( /\n/g, '' );
               }
             }
           });
@@ -255,13 +255,13 @@ module.exports = {
         }
         return code;
       },
+      format: function format(ast, noAlign) {
+        var me = this;
+        var source = ast.source();
+        var response = replaceJSXExpressionContainer(source);
+		var adjustment = 0;
 
-      format(ast, noAlign) {
-        const me = this;
-        let source = ast.source();
-        const response = replaceJSXExpressionContainer(source);
-
-        const containers = response.containers;
+        var containers = response.containers;
         source = response.source;
 
         if (!jsxOptions.attrsOnSameLineAsTag) {
@@ -277,15 +277,20 @@ module.exports = {
         if (!noAlign) {
           source = alingText(source, ast, htmlOptions);
         }
+		adjustment = 0;
+		var lines = source.split('\n');
+		if(lines.length){
+			adjustment = _numberOfChunks(lines[lines.length-1], htmlOptions.indent_char);
+		}
 
         source = restoreContainers(source, containers, jsxOptions.spaceInJSXExpressionContainers, jsxOptions.removeSpaceBeforeClosingJSX);
 
         if (containers.length > 0 || jsxOptions.JSXAttributeQuotes) {
-          const expressionContainers = { };
-          const ast2 = falafel(source, (node) => {
+          var expressionContainers = {};
+          var ast2 = falafel(source, function (node) {
             if (node.type === 'JSXAttribute' && node.value && node.value.type === 'StringLiteral' && jsxOptions.JSXAttributeQuotes) {
-              const jsxAttrValue = node.value;
-              const attrValue = transformString(jsxAttrValue.source(), { type: jsxOptions.JSXAttributeQuotes, avoidEscape: true });
+              var jsxAttrValue = node.value;
+              var attrValue = transformString(jsxAttrValue.source(), { type: jsxOptions.JSXAttributeQuotes, avoidEscape: true });
               jsxAttrValue.update(attrValue);
             }
 
@@ -293,42 +298,42 @@ module.exports = {
               if (node.expression.type === 'Literal' || node.expression.type === 'Identifier') {
                 return;
               }
-              const idx = Object.keys(expressionContainers).length;
-              const token = `__TT__TOKEN__TT__${  idx  }_T_`;
-              let formatted = node.expression.source();
+              var idx = Object.keys(expressionContainers).length;
+              var token = '__TT__TOKEN__TT__' + idx + '_T_';
+              var formatted = node.expression.source();
 
               if (node.expression.type === 'JSXElement') {
                 formatted = me.format(node.expression, true);
-              } else if (
-                node.expression.type !== 'JSXEmptyExpression'
-                && node.expression.type !== 'StringLiteral'
-                && node.expression.type !== 'TemplateLiteral'
-                && jsxOptions.formatJSXExpressions) {
+              } else if (node.expression.type !== 'JSXEmptyExpression' && node.expression.type !== 'StringLiteral' && node.expression.type !== 'TemplateLiteral' && jsxOptions.formatJSXExpressions) {
                 formatted = me._recursiveFormat(node.expression);
               }
 
               expressionContainers[token] = {
-                token,
-                formatted,
+                token: token,
+                formatted: formatted,
                 index: idx,
-                type: node.expression.type,
+                type: node.expression.type
               };
 
               node.expression.update(token);
-
             }
           });
 
           source = ast2.toString().split('\n');
+		  
 
-          source = source.map((line) => {
-            const keys = Object.keys(expressionContainers);
-            keys.forEach((key) => {
-              const index = line.indexOf(key);
-              const idx = _numberOfChunks(line, htmlOptions.indent_char);
+          source = source.map(function (line) {
+            var keys = Object.keys(expressionContainers);
+            keys.forEach(function (key) {
+              var index = line.indexOf(key);
+              var idx = _numberOfChunks(line, htmlOptions.indent_char);
+			  if (idx < adjustment) {
+				  idx = idx+adjustment;
+			  }
+			  
               if (index > -1) {
-                const theExpression = expressionContainers[key];
-                const parts = theExpression.formatted.split('\n').map((part, i) => {
+                var theExpression = expressionContainers[key];
+                var parts = theExpression.formatted.split('\n').map(function (part, i) {
                   if (i === 0) {
                     return part;
                   }
@@ -348,12 +353,11 @@ module.exports = {
             });
             return line.replace(/\s+$/, '');
           }).join('\n');
-
         }
         return source;
-      },
+      }
     };
 
     return ins;
-  },
+  }
 };
